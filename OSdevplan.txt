@@ -1,0 +1,78 @@
+Raspberry Pi PicoCalc Astralixi OS Development Plan 
+==============================================================
+
+Purpose and Scope
+-----------------
+- General-purpose OS for the Raspberry Pi PicoCalc (RP2040).
+- Target audience: advanced users and computer nerds.
+- Features: In-depth command-line interface (CLI) with rich commands.
+- User programs support with resource limits in v1, expandable later.
+- Storage support for SD card (PicoCalc’s built-in via SPI).
+- Supports user apps as `.asp` files (Astralixi OS apps) — special C files using an OS library for authorization.
+
+OS Style
+--------
+- Single-threaded synchronous execution initially (no multitasking).
+- Future plans for cooperative or preemptive multitasking.
+- Only one user program runs at a time in v1.
+- Later versions to support basic multitasking (e.g., background music playback alongside apps).
+
+User Interface
+--------------
+- CLI accessible via the PicoCalc’s built-in keyboard and screen.
+- Early commands: ~32 basic commands like `echo`, `ls`, `gpio read`, `mem`, `info`.
+- Goal: thousands of commands eventually.
+- User programs (`.asp` apps) auto-listed in an APP Explorer accessible via CLI.
+
+Storage & Filesystem
+--------------------
+- Support SD card on PicoCalc via SPI.
+- Filesystem planned: FAT32 or custom lightweight filesystem.
+- Commands for file management: `ls`, `cat`, `edit`, `rm`, `run`.
+- User programs stored on SD card as `.asp` or `.c` files.
+- `.asp` files use a specific OS-linked library that checks authorization before running.
+
+Input/Output
+------------
+- Keyboard input through GPIO/SPI matrix scanning.
+- Text output rendered on the PicoCalc screen via SPI.
+- UART debugging available during development but not primary.
+
+User Programs & Security
+------------------------
+- Programs executed via `run` command.
+- Initial resource limits on program size and memory usage.
+- Software sandboxing implemented with manually managed dynamic memory zones to isolate user programs.
+- `.asp` files link against an authorization library.
+- The authorization library checks a deep OS whitelist of approved apps before allowing execution.
+- Unauthorized or corrupted apps refuse to run and notify the user with an error message ("app corrupted, contact developer").
+- Users can add or remove installed apps from SD, but whitelist updates and additions are controlled by the OS vendor.
+- Whitelist updates distributed with OS firmware updates (via flash memory) or manual update process.
+
+Programming Language & Toolchain
+--------------------------------
+- OS and drivers written entirely in C.
+- Minimal assembly only for startup and critical boot code.
+- Toolchain: arm-none-eabi-gcc.
+- Build system: semi-custom script combining Make and CMake features.
+- `.asp` apps are essentially `.c` files built with the OS-specific library to enforce app authorization.
+
+Kernel Features (v1)
+--------------------
+- Basic memory utilities: `malloc`, `free`, `memcpy`.
+- System info commands exposing free RAM, uptime, etc.
+- Uptime tracking via timer or tick counter.
+- Simple software sandboxing with dynamically managed memory zones.
+- Error logging and panic handler (basic, with CLI output).
+- App authorization system integrated deeply with OS.
+- Support for single user program execution, future multitasking planned.
+
+OS Update Mechanism
+-------------------
+- OS updates distributed as new flash memory images.
+- Update includes OS code, whitelist of authorized apps, and core libraries.
+- Manual update option available for advanced users.
+- Flash update mechanism designed to be robust to avoid bricking.
+- Future enhancements may include incremental or delta updates.
+
+End of Expanded OS Development Plan
